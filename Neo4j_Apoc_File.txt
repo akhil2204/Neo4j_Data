@@ -1,0 +1,100 @@
+Add these jar files in  NEo4j/plugins Folder APOC ALL jar file (https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases), OJDC8 jar file from oracle Sql
+
+Add  these code in Neo4j/conf/neo4j.conf File(dbms.security.procedures.unrestricted=apoc.*
+apoc.import.file.eanbled=true
+apoc.export.file.enabled=true
+apoc.jdbc.oracle_url.url=jdbc:oracle:thin:system/reddy@localhost:1521/reddy)
+
+
+
+Sample Eaxmple 
+CALL apoc.load.jdbc('jdbc:oracle:thin:system/reddy@localhost:1521/reddy','imdb_null_values')
+yield row
+create (i:Imdb) set i = row
+match(row:Imdb )
+WITH
+    CASE row.REVENUE_MILLIONS
+        WHEN null
+        THEN 0
+        ELSE row.REVENUE_MILLIONS
+    END AS revenue,
+         CASE row.TITLE
+           WHEN null
+           THEN "No title"
+           ELSE row.TITLE
+        END AS title,
+        
+        case row.ACTORS
+        WHEN null
+           THEN "No actor"
+           ELSE row.ACTORS
+        END AS actors,
+        
+         case row.DIRECTOR
+        WHEN null
+           THEN "No director"
+           ELSE row.DIRECTOR
+        END AS director,
+        
+        
+          case row.DESCRIPTION
+        WHEN null
+           THEN "No description"
+           ELSE row.DESCRIPTION
+        END AS description,
+        
+        case row.METASCORE
+        WHEN null
+           THEN 0
+           ELSE row.METASCORE
+        END AS metascore,
+        
+          case row.DESCRIPTION
+        WHEN null
+           THEN "No votes"
+           ELSE row.DESCRIPTION
+        END AS votes,
+        
+        
+          case row.RANK
+        WHEN null
+           THEN 0
+           ELSE row.RANK
+        END AS rank,
+        
+        
+          case row.GENRE
+        WHEN null
+           THEN "No genre"
+           ELSE row.GENRE
+        END AS genre,
+        
+        
+          case row.RUNTIME_MINUTES
+        WHEN null
+           THEN 0
+           ELSE row.RUNTIME_MINUTES
+        END AS runtimeMinutes,
+        
+        
+          case row.YEAR
+        WHEN null
+           THEN 0
+           ELSE row.YEAR
+        END AS year,
+        
+          case row.RATING
+        WHEN null
+           THEN 0
+           ELSE row.RATING
+        END AS rating
+        
+        
+        
+    MERGE (m:Movie{Title:title,RevenueEarned:revenue})
+    MERGE (im:IMDB_Dataevenue{Rank:rank,Votes:votes,Metascore:metascore})
+    MERGE (a:Actors{Name:actors})
+MERGE (d:Director{Name:director,Description:description})
+MERGE (m)-[db:Directed_By{Genre:genre,Runtime:runtimeMinutes}]->(d)
+MERGE(m)-[re:Reviewed_By{Rating:rating}]->(im)
+MERGE (a)-[ac:Acted_In{Release_Year:year}]->(m)
